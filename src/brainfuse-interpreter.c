@@ -2,20 +2,65 @@
 #include <stdlib.h>
 #include <string.h>
 #define INITIAL_DATA_SIZE 1000
+#define INITIAL_LOOP_SIZE 10
 #define RESIZE_CHANGE_ADD 1000
+#define UNKNOWN 0x0
+#define OPEN_BRACE 0x7
+#define CLOSE_BRACE 0x8
 
 char *program;
 int program_length;
 
+char **loop_stack;
+char **loop_top;
+long loop_size = INITIAL_LOOP_SIZE * sizeof(char*);
+
 char *data_start;
-int data_size = INITIAL_DATA_SIZE;
+long data_size = INITIAL_DATA_SIZE;
 char *data_ptr;
 char *inst_ptr;
 
+void push (char * inst) {
+    //printf("pushing %d to %d", inst, loop_top);
+    *loop_top = inst;
+    loop_top += sizeof(char *);
+    if(loop_top > loop_stack + loop_size) {
+        fprintf(stderr, "LOOP POINTER OVERFLOW\n");
+        loop_stack = (char **) realloc(loop_stack, loop_size+(INITIAL_LOOP_SIZE * sizeof(char*)));
+        loop_size+=INITIAL_LOOP_SIZE * sizeof(char*);
+        fprintf(stderr, "RESIZED LOOP_STACK TO %ld BYTES\n", loop_size);
+    }
+}
+
+//poping empty stack too much when running echo.bf, something is up here
+
+char * pop() {
+    if(loop_top <= loop_stack) {
+        fprintf(stderr, "POP ON EMPTY LOOP_STACK, LIKELY UNMATCHED BRACKETS\n");
+        loop_top = loop_stack;
+        return (char *) *loop_top;
+    }
+
+    loop_top-=sizeof(long);
+    return (char *) *loop_top;
+}
+
 int main(int argc, char **argv) {
-    if(argc < 2) fprintf(stderr, "Usage: bf filename\n");
+    if(argc < 2) {
+        fprintf(stderr, "Usage: bf filename\n");
+        return 1;
+    }
+    int DEBUG = 0;
+    if(argc > 2) DEBUG = 1;
     //load program
     FILE *bf = fopen(argv[1], "r");
+    if(bf == NULL) {
+        fprintf(stderr, "I/O ERROR");
+        return 1;
+    }
+
+    if(DEBUG) printf("FINISHED FILE");
+
     char ch;
     program_length = 0;
     while((ch=fgetc(bf)) != EOF) {
@@ -24,7 +69,10 @@ int main(int argc, char **argv) {
             program_length++;
         }
     }
-    program = malloc(program_length);
+    program = (char *) malloc(program_length);
+    loop_stack = (char **) malloc(loop_size);
+    loop_top = loop_stack;
+
     int i = 0;
     rewind(bf);
     while((ch=fgetc(bf)) != EOF) {
@@ -41,10 +89,8 @@ int main(int argc, char **argv) {
     inst_ptr = program;
     char* prev_ins = program;
     while(inst_ptr < (char *)(program + program_length)) {
-        #ifdef DEBUG
         //debug data tracker
-		printf("\x1B[33m<DEBUG: data_ptr: %d (%d), before instruction %d (%c)>\x1B[0m", data_ptr-data_start, *data_ptr, inst_ptr-program, *(inst_ptr));
-		#endif
+		if(DEBUG) printf("\x1B[33m<DEBUG: data_ptr: %ld (%d), before instruction %ld (%c)>\x1B[0m", data_ptr-data_start, *data_ptr, inst_ptr-program, *(inst_ptr));
         switch(*inst_ptr) {
             case '>':
                 ++data_ptr;
@@ -52,7 +98,7 @@ int main(int argc, char **argv) {
                     data_start = (char *) realloc(data_start, data_size+RESIZE_CHANGE_ADD);
                     memset(data_start+data_size, 0, RESIZE_CHANGE_ADD); //zeros
                     data_size+=RESIZE_CHANGE_ADD;
-                    fprintf(stderr, "RESIZED ARRAY TO %d BYTES\n", data_size);
+                    fprintf(stderr, "RESIZED ARRAY TO %ld BYTES\n", data_size);
                 }
                 break;
             case '<':
@@ -87,22 +133,20 @@ int main(int argc, char **argv) {
                         }
                     }
                 } else {
-                    prev_ins = inst_ptr;
+                    push(inst_ptr);
                 }
                 break;
             case ']':
                 if(*data_ptr != 0) {
-                    inst_ptr = prev_ins;
+                    inst_ptr = pop();
                 }
                 break;
         }
 
-        #ifdef DEBUG
         //debug data tracker
-		//printf("\x1B[33m<DEBUG: data_ptr: %d (%d), after instruction %d (%c)>\x1B[0m", data_ptr-data_start, *data_ptr, inst_ptr-program, *(inst_ptr));
-        #endif
+		//if(DEBUG) printf("\x1B[33m<DEBUG: data_ptr: %d (%d), after instruction %d (%c)>\x1B[0m", data_ptr-data_start, *data_ptr, inst_ptr-program, *(inst_ptr));
         inst_ptr++;
-		
+
 		#ifdef _WIN32
         //Sleep(1000);
 		#else
@@ -110,5 +154,6 @@ int main(int argc, char **argv) {
 		#endif
     }
     free(data_start);
+    free(loop_stack);
     return 0;
 }

@@ -1,25 +1,14 @@
-
-
-
-if [ $# -lt 2 ] ; then
-    echo "Useage: bf <mode> <input-file> -[s(ize)][o(utput)]";
+#!/bin/bash
+if [ $# -lt 1 ] ; then
+    echo "Useage:";
+    echo "  bf <input-file>"
+    echo "  bf <mode> <input-file> -[s(ize)][o(utput)]";
+elif [ $# -lt 2 ] ; then
+    $BF_BIN/bf_i "$1";
 else
 
-
-    BIN="${BASH_SOURCE[0]}";
-    if ([ -h "${BIN}" ]) then
-      while([ -h "${BIN}" ]) do BIN=`readlink "${BIN}"`; done
-    fi
-    pushd . > /dev/null;
-    cd `dirname ${BIN}` > /dev/null;
-    BIN=`pwd`;
-    popd  > /dev/null;
-
-    export PATH=$PATH:$BIN;
-
-
     if [ "$1" == "run" ] || [ "$1" == "r" ] ; then
-        bfi "$2";
+        $BF_BIN/bf_i "$2";
     elif [ "$1" == "compile" ] || [ "$1" == "c" ] ; then
 
         datasize="30000";
@@ -37,8 +26,7 @@ else
             output="-o"$6"";
         fi
 
-
-        bfc "$2" "tmp.c" "$datasize";
+        $BF_BIN/bf_c "$2" "tmp.c" "$datasize";
 
         if [ "$output" == "none" ] ; then
             gcc "tmp.c";

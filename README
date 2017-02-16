@@ -1,15 +1,4 @@
-To install bf and bfc, along with bff <mode> <file> [options], insert the following into your .bashrc:
-
-
-bfp="/home/m/mahlauheinerts/CS-Classes/cs220s2017/cs220s2017-michionlion/ex/bf/bin";
-function bf() {
-	
-}
-
-function bfc() {
-
-}
-
-function bff() {
-	bash "$bfp/bf.sh"
-}
+To install bf and bfc, insert the following into your ~/.bashrc:
+	export BF_BIN="<brainfuse-base-dir>/bin/";
+	export PATH=$PATH:$BF_BIN'bash';
+Now you can use bf and bfc in your terminal

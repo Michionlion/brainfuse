@@ -1,0 +1,30 @@
+#!/bin/bash
+if [ $# -lt 1 ] ; then
+    echo "Useage:"
+    echo "  bfc <input-file> -[s(ize)][o(utput)]";
+else
+
+    datasize="30000";
+    if [ "$2" == "-size" ] || [ "$2" == "-s" ] ; then
+        datasize="$3";
+    elif [ "$4" == "-size" ] || [ "$4" == "-s" ] ; then
+        datasize="$5";
+    fi
+
+    output="none";
+
+    if [ "$2" == "-output" ] || [ "$2" == "-o" ] ; then
+        output="-o"$3"";
+    elif [ "$4" == "-output" ] || [ "$4" == "-o" ] ; then
+        output="-o"$5"";
+    fi
+
+    $BF_BIN/bf_c "$1" "tmp.c" "$datasize";
+
+    if [ "$output" == "none" ] ; then
+        gcc "tmp.c";
+    else
+        gcc "tmp.c" "$output";
+    fi
+    rm "tmp.c";
+fi
