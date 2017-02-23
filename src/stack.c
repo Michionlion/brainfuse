@@ -31,13 +31,20 @@ char * pop() {
 		char *r = tmp->data;
 		free(tmp);
 		return r;
-	} else {
-		
+	} else if(size==1) {
 		size = 0;
 		char *r = top->data;
 		free(top);
+		top = NULL;
 		return r;
+	} else {
+		fprintf(stderr, "POPPED FROM EMPTY STACK");
+		return NULL;
 	}
+}
+
+char * peek() {
+	return top->data;
 }
 
 void stack_free() {
@@ -48,33 +55,33 @@ void stack_free() {
 	}
 }
 
-int main() {
-	char in;
-
-	char list[] = {'a','b','c','d','e','f','g','h','i','j','k'};
-	int done = 1;
-	while(done) {
-		printf("Enter <op> (+ is push, - is pop, = is display, q is quit): ");
-		scanf("%c", &in);
-		switch(in) {
-			case '+':
-				printf("Enter 0-10 to push: ");
-				int i;
-				scanf("%d", &i);
-				printf("Pushing %c\n", list[i]);
-				push(list+i);
-				break;
-			case '-':
-				printf("popped '%c'\n", *pop());
-				break;
-			case '=':
-				printf("size=%d, val=%c, addr=%ld\n", size, *(top->data), top->data);
-				break;
-			case 'q':
-				done = 0;
-				break;
-		}
-	}
-	stack_free();
-	return 0;
-}
+// int main() {
+// 	char in;
+//
+// 	char list[] = {'a','b','c','d','e','f','g','h','i','j','k'};
+// 	int done = 1;
+// 	while(done) {
+// 		printf("Enter <op> (+ is push, - is pop, = is display, q is quit): ");
+// 		scanf("%c", &in);
+// 		switch(in) {
+// 			case '+':
+// 				printf("Enter 0-10 to push: ");
+// 				int i;
+// 				scanf("%d", &i);
+// 				printf("Pushing %c\n", list[i]);
+// 				push(list+i);
+// 				break;
+// 			case '-':
+// 				printf("popped '%c'\n", *pop());
+// 				break;
+// 			case '=':
+// 				printf("size=%d, val=%c, addr=%ld\n", size, *(top->data), top->data);
+// 				break;
+// 			case 'q':
+// 				done = 0;
+// 				break;
+// 		}
+// 	}
+// 	stack_free();
+// 	return 0;
+// }

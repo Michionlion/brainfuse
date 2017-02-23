@@ -19,5 +19,5 @@ now reset
 <                           go back to last char (or c2 if first char was 10)
 [<]                         go back to first zero (c2)
 ++++ ++++ ++.---- ---- --   print newline and reset
-.<.<.                          reset to c0
+<<                          reset to c0
 ]

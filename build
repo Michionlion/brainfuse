@@ -5,6 +5,6 @@ gcc src/brainfuse-compiler.c -o bin/bf_c
 echo 'Finished build!'
 read -p "Enable dev binaries? (y/n): " ans
 if [ "$ans" == "y" ] ; then
-	source endev
+	source endev;
 fi
 

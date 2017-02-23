@@ -1,1 +1,1 @@
-export PATH=$PATH:bin:bin/bash
+export PATH=$PATH:$BF_BIN:$BF_BIN/bash;

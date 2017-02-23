@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stack.c>
+#include "stack.c"
 #define INITIAL_DATA_SIZE 1000
 #define INITIAL_LOOP_SIZE 10
 #define RESIZE_CHANGE_ADD 1000
@@ -53,7 +53,6 @@ int main(int argc, char **argv) {
     }
     fclose(bf);
     //printf("read");
-    
 
     //interpret
     data_start = (char *) calloc(data_size, 1);
@@ -91,6 +90,7 @@ int main(int argc, char **argv) {
                 *data_ptr = getchar();
                 break;
             case '[':
+                //printf("hit loop enter - data_ptr: %ld (%d), before instruction %ld (%c)\n", data_ptr-data_start, *data_ptr, inst_ptr-program, *(inst_ptr));
                 if(*data_ptr == 0) {
                     //jump to after ]
                     int b = 1;
@@ -104,14 +104,20 @@ int main(int argc, char **argv) {
                                 break;
                         }
                     }
+                    //sanity check to ensure not double-looping
+                    while(peek() == inst_ptr) pop();
+
                 } else {
                     push(inst_ptr);
                 }
                 break;
             case ']':
+            //printf("hit loop exit - data_ptr: %ld (%d), before instruction %ld (%c)\n", data_ptr-data_start, *data_ptr, inst_ptr-program, *(inst_ptr));
                 if(*data_ptr != 0) {
-                    inst_ptr = pop();
-                }
+                    char * p = peek();
+                    if(p != NULL) inst_ptr = p;
+                    else fprintf(stderr, "GOT NULL RESULT\n");
+                } else pop();
                 break;
         }
 
