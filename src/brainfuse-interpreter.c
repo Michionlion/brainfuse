@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stack.c>
 #define INITIAL_DATA_SIZE 1000
 #define INITIAL_LOOP_SIZE 10
 #define RESIZE_CHANGE_ADD 1000
@@ -11,39 +12,10 @@
 char *program;
 int program_length;
 
-char **loop_stack;
-char **loop_top;
-long loop_size = INITIAL_LOOP_SIZE * sizeof(char*);
-
 char *data_start;
 long data_size = INITIAL_DATA_SIZE;
 char *data_ptr;
 char *inst_ptr;
-
-void push (char * inst) {
-    //printf("pushing %d to %d", inst, loop_top);
-    *loop_top = inst;
-    loop_top += sizeof(char *);
-    if(loop_top > loop_stack + loop_size) {
-        fprintf(stderr, "LOOP POINTER OVERFLOW\n");
-        loop_stack = (char **) realloc(loop_stack, loop_size+(INITIAL_LOOP_SIZE * sizeof(char*)));
-        loop_size+=INITIAL_LOOP_SIZE * sizeof(char*);
-        fprintf(stderr, "RESIZED LOOP_STACK TO %ld BYTES\n", loop_size);
-    }
-}
-
-//poping empty stack too much when running echo.bf, something is up here
-
-char * pop() {
-    if(loop_top <= loop_stack) {
-        fprintf(stderr, "POP ON EMPTY LOOP_STACK, LIKELY UNMATCHED BRACKETS\n");
-        loop_top = loop_stack;
-        return (char *) *loop_top;
-    }
-
-    loop_top-=sizeof(long);
-    return (char *) *loop_top;
-}
 
 int main(int argc, char **argv) {
     if(argc < 2) {
@@ -70,8 +42,6 @@ int main(int argc, char **argv) {
         }
     }
     program = (char *) malloc(program_length);
-    loop_stack = (char **) malloc(loop_size);
-    loop_top = loop_stack;
 
     int i = 0;
     rewind(bf);
@@ -83,6 +53,8 @@ int main(int argc, char **argv) {
     }
     fclose(bf);
     //printf("read");
+    
+
     //interpret
     data_start = (char *) calloc(data_size, 1);
     data_ptr = data_start; //initialize ptr to start of data
@@ -154,6 +126,6 @@ int main(int argc, char **argv) {
 		#endif
     }
     free(data_start);
-    free(loop_stack);
+    stack_free();
     return 0;
 }
