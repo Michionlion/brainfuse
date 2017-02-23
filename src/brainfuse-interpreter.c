@@ -5,9 +5,6 @@
 #define INITIAL_DATA_SIZE 1000
 #define INITIAL_LOOP_SIZE 10
 #define RESIZE_CHANGE_ADD 1000
-#define UNKNOWN 0x0
-#define OPEN_BRACE 0x7
-#define CLOSE_BRACE 0x8
 
 char *program;
 int program_length;
@@ -52,8 +49,6 @@ int main(int argc, char **argv) {
         }
     }
     fclose(bf);
-    //printf("read");
-
     //interpret
     data_start = (char *) calloc(data_size, 1);
     data_ptr = data_start; //initialize ptr to start of data
@@ -83,14 +78,12 @@ int main(int argc, char **argv) {
                 --*data_ptr;
                 break;
             case '.':
-                //printf("%d", ch = *data_ptr);
 				putchar(ch = *data_ptr);
                 break;
             case ',':
                 *data_ptr = getchar();
                 break;
             case '[':
-                //printf("hit loop enter - data_ptr: %ld (%d), before instruction %ld (%c)\n", data_ptr-data_start, *data_ptr, inst_ptr-program, *(inst_ptr));
                 if(*data_ptr == 0) {
                     //jump to after ]
                     int b = 1;
@@ -112,7 +105,6 @@ int main(int argc, char **argv) {
                 }
                 break;
             case ']':
-            //printf("hit loop exit - data_ptr: %ld (%d), before instruction %ld (%c)\n", data_ptr-data_start, *data_ptr, inst_ptr-program, *(inst_ptr));
                 if(*data_ptr != 0) {
                     char * p = peek();
                     if(p != NULL) inst_ptr = p;
@@ -120,16 +112,8 @@ int main(int argc, char **argv) {
                 } else pop();
                 break;
         }
-
-        //debug data tracker
-		//if(DEBUG) printf("\x1B[33m<DEBUG: data_ptr: %d (%d), after instruction %d (%c)>\x1B[0m", data_ptr-data_start, *data_ptr, inst_ptr-program, *(inst_ptr));
         inst_ptr++;
 
-		#ifdef _WIN32
-        //Sleep(1000);
-		#else
-        //sleep(1);
-		#endif
     }
     free(data_start);
     stack_free();
