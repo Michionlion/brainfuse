@@ -17,6 +17,10 @@ char* loadDirective(char* start, int length) {
 	return "{dir_body}";
 }
 
+char* loadFile(char* name) {
+	
+}
+
 int main(int argc, char** argv) {
 	if(argc < 2) {
 		fprintf(stderr, "Usage: bfp source destination\n");
