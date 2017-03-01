@@ -37,10 +37,15 @@ char* loadDirective(char* start, int length) {
 			//after operand
 		}
 
+		char* op = (char*) malloc(operand_length+1);
+		strncpy(operand_start, op, directive_length);
+		op[directive_length] = '\0';
 		if(strncmp(start, "include", directive_length) == 0) {
 			//include direction
+			return include(op);
 		} else if(strncmp(start, "put", directive_length) == 0) {
 			//put directive
+			return put(op);
 		}
 
 
