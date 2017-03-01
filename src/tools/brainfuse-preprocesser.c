@@ -1,15 +1,58 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include "include-directive.c"
+#include "put-directive.c"
 
 #define DIRECTIVE_CHAR '~'
 
 char* loadDirective(char* start, int length) {
 	int i;
+	char* operand_start = NULL;
+	int operand_length = 0;
+	int directive_length = 0;
+	int in_operand = 0;
 	for(i=0; i < length; i++) {
-		//printout directive
-		putchar(start[i]);
+		if((start[i] == '<' || start[i] == '"') && in_operand == 0) {
+			in_operand = 1;
+			operand_start = start + i + 1;
+
+
+			//remove trailing spaces from directive pointer length
+			int k = i;
+			while(start[--k]==' ') {
+				directive_length--;
+			}
+
+		} else if ((start[i] == '<' || start[i] == '"') && in_operand == 1) {
+			in_operand = -1; // no more operand
+		} else if(in_operand == 1) {
+			//inside operand
+			operand_length++;
+		} else if(in_operand == 0) {
+			//not in operand, add to directive
+			directive_length++;
+		} else {
+			//after operand
+		}
+
+		if(strncmp(start, "include", directive_length) == 0) {
+			//include direction
+		} else if(strncmp(start, "put", directive_length) == 0) {
+			//put directive
+		}
+
+
 	}
+
+	if(operand_start == NULL) {
+		fprintf(stderr, "OPERAND NOT SPECIFIED IN DIRECTIVE");
+		return NULL;
+	}
+
+
+
 
 	//load directive body (whatever it is)
 
@@ -18,7 +61,8 @@ char* loadDirective(char* start, int length) {
 }
 
 char* loadFile(char* name) {
-	
+
+	return "";
 }
 
 int main(int argc, char** argv) {
@@ -41,7 +85,7 @@ int main(int argc, char** argv) {
 	while((ch=fgetc(source)) != EOF) {
 		if(ch==DIRECTIVE_CHAR && !in_dir) {
 			//open new directive
-			dir_start = malloc(20);
+			dir_start = (char*) malloc(20);
 			in_dir = true;
 		} else if (ch==DIRECTIVE_CHAR && in_dir) {
 			//close directive
@@ -59,7 +103,7 @@ int main(int argc, char** argv) {
 			//putchar(ch);
 			dir_start[dir_length++] = ch;
 			//resize if needed
-			if(dir_length > 15) dir_start = realloc(dir_start, dir_length+10);
+			if(dir_length > 15) dir_start = (char*) realloc(dir_start, dir_length+10);
 		} else {
 			//outside directive
 			fputc(ch, dest);
