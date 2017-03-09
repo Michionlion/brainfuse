@@ -1,4 +1,6 @@
-# >brainfuse
+## >brainfuse
+
+To build >brainfuse and it's tools, execute '. ./build'.
 
 To install bf and bfc, insert the following into your ~/.bashrc:
 	export BF_BIN="<brainfuse-base-dir>/bin/";
