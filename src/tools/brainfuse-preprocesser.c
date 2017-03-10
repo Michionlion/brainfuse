@@ -16,7 +16,7 @@ void pstrn(const char* string, int length);
 //implement functions
 
 char* loadDirective(char* start, int length) {
-	printf("loadDirective(%s, %d)\n", start, length);
+	printf("loadDirective(\"%s\", %d)\n", start, length);
 	int i;
 	char* operand_start = NULL;
 	int operand_length = 0;
@@ -77,7 +77,7 @@ char* loadDirective(char* start, int length) {
 		return put(op);
 	}
 
-	return NULL;
+	return "{DIRECTIVE LOAD ERROR}";
 }
 
 int main(int argc, char** argv) {
@@ -88,26 +88,35 @@ int main(int argc, char** argv) {
 
 	FILE* source = fopen(argv[1], "r");
 	if(source == NULL) {
-		printf("Error");
+		printf("Error 1");
 		return -1;
 	}
 
 	//find length
 	fseek(source, 0L, SEEK_END);
 	int length = ftell(source);
+	printf("Length: %d\n", length);
 	rewind(source);
 	//allocate mem for file
 	char* src = (char*) malloc(length+1);
 	src[length] = '\0'; //ensure end is 0
 
-	fgets(src, length, source); // read file into src (doesn't overwrite end)
+	int r = fread(src, 1, length, source); // read file into src (doesn't overwrite end)
 	fclose(source); //close source file
+
+	if(r != length) {
+		printf("ERROR 2");
+		return -1;
+	}
+
 
 	FILE* dest = fopen(argv[2], "w");
 	if(dest == NULL) {
-		printf("ERROR");
+		printf("ERROR 3");
 		return -1;
 	}
+
+	printf("source:\n%s\n", src);
 
 	char* out = process(src); //process src
 	free(src);
@@ -124,8 +133,14 @@ char* process(char* code) {
 	bool in_dir = false;
 	char* dir_start;
 	int dir_length = 0;
-	int i;
-	for(i=0; (ch=code[i]) != '\0'; i++) {
+	int srcChar;
+	int dstChar;
+	int dst_length = 20;
+	char* dst_start = (char*) malloc(20);
+
+	printf("processing:\n");
+	for(srcChar=0; (ch=code[srcChar]) != '\0'; srcChar++) {
+		putchar(ch);
 		if(ch==DIRECTIVE_CHAR && !in_dir) {
 			//open new directive
 			dir_start = (char*) malloc(20);
@@ -135,7 +150,27 @@ char* process(char* code) {
 			//insert directive contents
 			dir_start[dir_length] = '\0';
 			char* dir_contents = loadDirective(dir_start, dir_length);
-			fputs(dir_contents, dest);
+			//fputs(dir_contents, dest);
+
+			printf("Got directive: %s\n", dir_contents);
+
+
+			dst_start[dstChar] = '\0';
+			printf("after 0");
+			int len = strlen(dir_contents);
+			printf("after 1");
+			dstChar+=len;
+			printf("after 2");
+			dst_start = (char*) realloc(dst_start, (dst_length += len));
+			printf("after 3");
+			dst_start = strncat(dst_start, dir_contents, len);
+			printf("after 4");
+
+			//free mem
+			free(dir_start);
+			printf("after 6");
+			free(dir_contents);
+			printf("after 6");
 
 			//reset
 			in_dir = false;
@@ -144,24 +179,31 @@ char* process(char* code) {
 		} else if(in_dir) {
 			//inside directive
 			//putchar(ch);
-			dir_start[dir_length++] = ch;
+			dir_start[dir_length] = ch;
+			dir_length++;
 			//resize if needed
 			if(dir_length > 15) dir_start = (char*) realloc(dir_start, dir_length+10);
 		} else {
 			//outside directive
-			fputc(ch, dest);
+			if(dstChar - 1 >= dst_length) dst_start = (char*) realloc(dst_start, (dst_length += 20));
+			dst_start[dstChar] = ch;
+			dstChar++;
 		}
 	}
 
-	return "";
+	//resize to minimum
+	dst_start = (char*) realloc(dst_start, dstChar);
+	dst_start[dstChar] = '\0';
+
+	return dst_start;
 }
 
 // DIRECTIVES
 
 char* include(char* operand, bool std) {
-	printf("Loading '%s'\n", operand);
+	//printf("Loading '%s'\n", operand);
 
-	FILE* src = fopen(operand, "r");
+	//FILE* src = fopen(operand, "r");
 
 
 
