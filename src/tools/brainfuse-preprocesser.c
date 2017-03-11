@@ -9,7 +9,8 @@ bool debug = false;
 
 //declare functions
 char* include(char* operand, char* name, bool std);
-char* put(char* operand);
+char* set(char* operand);
+char* add(char* operand);
 char* loadDirective(char* start, int length, char* name);
 char* process(char* code, char* name);
 
@@ -44,15 +45,7 @@ char* loadDirective(char* start, int length, char* name) {
 		} else if ((start[i] == '>' || start[i] == '"') && in_operand == 1) {
 			operand_length = start + i - operand_start;
 			in_operand = -1; // no more operand
-		}// else if(in_operand == 1) {
-		// 	//inside operand
-		// 	// operand_length++;
-		// } else if(in_operand == 0) {
-		// 	//not in operand, add to directive
-		// 	// directive_length++;
-		// } else {
-		// 	//after operand
-		// }
+		}
 	}
 
 	//now that we have directive and operand
@@ -69,12 +62,15 @@ char* loadDirective(char* start, int length, char* name) {
 
 	//call correct directive functions with operand
 
-	if(strncmp(start, "include", directive_length) == 0) {
+	if(strncmp(start, "include", 7) == 0) {
 		//include direction
 		return include(op, name, std);
-	} else if(strncmp(start, "put", directive_length) == 0) {
+	} else if(strncmp(start, "set", 3) == 0) {
 		//put directive
-		return put(op);
+		return set(op);
+	} else if(strncmp(start, "add", 3) == 0) {
+		//put directive
+		return add(op);
 	}
 
 	//make heap string so can be freed
@@ -291,14 +287,42 @@ char* include(char* operand, char* name, bool std) {
 	free(src);
 	free(operand);
 
-	return out;
+	return out; // return include result
 }
 
-char* put(char* operand) {
+//TODO: TEST THIS CODE
+
+char* set(char* operand) {
 	if(debug) printf("Operand: '%s'", operand);
+
+	int num = strtol(operand, NULL, 0);
+	//rudimentary impl now, should change to looping impl
+	char* code = (char*) malloc(num+4);
+
+	strcpy(code, "[<]"); // zero the cell
+	memset(code+3, '+', num); // make num +'s
+	code[num+3] = '\0'; // ensure terminator
+
+	//need to add error checking
+	// char* str = (char*) malloc(21);
+	// str[20] = '\0';
+	// strcpy(str, "{put generated code}");
+
+
+	free(operand);
+	return code;
+}
+
+//TODO: IMPEMENT ADD AFTER PUT TESTS
+
+char* add(char* operand) {
 	char* str = (char*) malloc(21);
 	str[20] = '\0';
-	strcpy(str, "{put generated code}");
+	strcpy(str, "{add generated code}");
+
+
+
+
 	free(operand);
 	return str;
 }
