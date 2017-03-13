@@ -9,4 +9,3 @@ read -p "Enable dev binaries? (y/n): " ans
 if [ "$ans" == "y" ] ; then
 	source endev;
 fi
-
