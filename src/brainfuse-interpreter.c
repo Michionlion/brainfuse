@@ -1,7 +1,14 @@
+/*
+	>brainfuse language interpreter
+	>brainfuse is based on the brainf**k language
+
+	Author: Michionlion | Saejin Mahlau-Heinert
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "stack.c"
+
 #define INITIAL_DATA_SIZE 1000
 #define INITIAL_LOOP_SIZE 10
 #define RESIZE_CHANGE_ADD 1000
